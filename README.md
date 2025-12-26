@@ -1,129 +1,130 @@
 # Fossil-Fuel-Dependence-Sovereign-Bank-Nexus
 Fossil fuel dependence converts climate transition risk into a correlated sovereign–bank balance-sheet shock, breaking diversification assumptions and amplifying systemic risk.
 
-# Triple-Knot Contagion Model (TKCM)
+# Open Economy Nexus & Triple-Knot Contagion Frameworks
 
 ## Overview
 
-The **Triple-Knot Contagion Model (TKCM)** is a Python-based simulation framework designed to quantify and visualize systemic risk within a sovereign-bank-corporate nexus. It models the feedback loops between three critical sectors:
+This repository implements a dual-framework approach to quantifying systemic risk within the **Sovereign-Bank-Corporate Nexus**. It contains two complementary models designed to analyze how financial contagion spreads through feedback loops in open economies:
 
-1.  **Sovereign Debt** ($\delta_L$)
-2.  **Corporate FX Exposure** ($\delta_{FX}$)
-3.  **Banking Sector Capitalization** ($\delta_K$)
+1.  **The Triple-Knot Contagion Model (TKCM):** A static, non-linear stress-testing tool focused on "regime classification" and policy multipliers.
+2.  **The Open Economy Nexus Model (OENM):** A stochastic, structural simulation using coupled differential equations to model time-varying dynamics and "cliff effects."
 
-Unlike standard linear risk models, this tool implements a **non-linear stress multiplier** ($M(\kappa)$) to demonstrate how shocks amplify during regimes of high financial fragility.
+---
 
-## Theoretical Framework
+## 1. Triple-Knot Contagion Model (TKCM)
 
-The core of the simulation is the **Triple-Knot Index ($\kappa$)**, which acts as an attractor for systemic collapse.
+The TKCM focuses on the **amplification of losses** based on the fragility of the financial system. It calculates a systemic index ($\kappa$) that acts as a multiplier for standard credit risk models.
 
-### 1. The Kappa Equation
-The systemic risk index is calculated as:
+### Theoretical Framework
+The core metric is the **Triple-Knot Index ($\kappa$)**, defined as:
 
 $$ \kappa = \frac{\lambda_s \cdot \gamma_s \cdot \alpha_s}{\delta_L \cdot \delta_{FX} \cdot \delta_K} $$
 
-Where:
-*   $\lambda_s$: Market Illiquidity Parameter
-*   $\gamma_s$: FX Sensitivity
-*   $\alpha_s$: Banking Sector Correlation
-*   $\delta$: Respective buffers for Liquidity, FX reserves, and Capital.
+Where the numerator represents sensitivities (Illiquidity $\lambda$, FX $\gamma$, Correlation $\alpha$) and the denominator represents buffers (Liquidity $\delta_L$, Reserves $\delta_{FX}$, Capital $\delta_K$).
 
-### 2. Systemic Regimes
-The model classifies the economy into four regimes based on $\kappa$:
-*   **Stable:** $\kappa \le 0.3$
-*   **Fragile:** $0.3 < \kappa \le 0.6$
-*   **Critical:** $0.6 < \kappa < 1.0$
-*   **Collapsing:** $\kappa \ge 1.0$
+### Systemic Regimes & Multiplier
+The model defines the economy's state and applies a hyperbolic stress multiplier ($M$):
 
-### 3. The Stress Multiplier
-To simulate contagion, the model applies a hyperbolic multiplier to loss estimates:
+| Regime | $\kappa$ Range | Multiplier Logic $M(\kappa)$ | Description |
+| :--- | :--- | :--- | :--- |
+| **Stable** | $\kappa \le 0.3$ | $\approx 1.0$ | Standard linear loss models apply. |
+| **Fragile** | $0.3 < \kappa \le 0.6$ | Increasing | Feedback loops begin to amplify shocks. |
+| **Critical** | $0.6 < \kappa < 1.0$ | Exponential | Small shocks cause massive losses. |
+| **Collapsing** | $\kappa \ge 1.0$ | Singularity | Systemic freeze; multiplier capped for stability. |
 
 $$ M(\kappa) = \frac{1}{1 - \kappa} $$
 
-As $\kappa \to 1$, $M(\kappa) \to \infty$, simulating a singularity or total systemic freeze.
+### Key Outputs
+*   **Policy Trade-off Analysis:** Visualizes the effectiveness of interventions (e.g., LOLR, Capital Controls) vs. their implementation lags and side effects.
+*   **Regime Heatmaps:** Contours showing how changes in FX sensitivity and illiquidity shift the economy into critical zones.
 
-## Features
+---
 
-*   **Monte Carlo Simulation:** Compares "Standard" (decoupled) risk models against the "Coupled Nexus" model using 5,000 simulations with correlated shocks via Cholesky decomposition.
-*   **Scenario Analysis:** Simulates specific economic scenarios (e.g., "Baseline" vs. "Disorderly").
-*   **Policy Evaluation:** Analyzes the effectiveness of interventions (FX Intervention, LOLR, Capital Controls) against their implementation lag and side effects.
-*   **Visualization:** Generates publication-ready plots for sensitivity analysis, non-linear amplification, and policy trade-offs.
+## 2. Open Economy Nexus Model (OENM)
 
-## Prerequisites
+The OENM is a **dynamic structural framework** that uses Stochastic Differential Equations (SDEs) to simulate the evolution of the crisis over time ($t$). It is designed to capture **Sudden Stops** and **Liquidity Freezes**.
 
-The project requires **Python 3.8+** and the following libraries:
+### Structural Equations
+The model tracks three coupled state variables:
 
-*   `numpy`
-*   `pandas`
-*   `matplotlib`
-*   `seaborn`
-*   `scipy`
+1.  **Sovereign Risk ($P^S_t$):** Driven by mean-reversion to a target that shifts based on external stress.
+    $$ dP^S_t = \kappa_S (\theta^S(X_t) - P^S_t)dt + \sigma_S \sqrt{P^S_t} dW^S_t $$
+2.  **Corporate Distress ($L^C_t$):** Models the "Freezing" of corporate balance sheets when Sovereign and FX risks combine.
+3.  **External Stress ($X_t$):** Uses a **Sigmoid Function** to model non-linear capital flight when sovereign risk hits a critical threshold ($P_{crit}$).
 
-## Installation
+$$ \Psi(P^S) = \frac{X_{max}}{1 + e^{-\alpha(P^S - P_{crit})}} $$
 
-1.  Clone the repository or save the script.
-2.  Install the dependencies:
+### Visualization Suite
+The OENM includes an advanced visualization module:
+*   **3D Phase Space:** A trajectory plot showing the economy moving through the $P^S - L^C - X$ volume, color-coded by time.
+*   **Bifurcation Diagrams:** Analysis of system stability (via Eigenvalues) as parameters change.
+*   **Structural Stability Maps:** Heatmaps identifying globally stable vs. unstable regions based on structural parameters.
+
+---
+
+## Getting Started
+
+### Prerequisites
+The framework requires Python 3.8+ and the following scientific computing libraries:
 
 ```bash
 pip install numpy pandas matplotlib seaborn scipy
 ```
 
-## Usage
-
-Run the main script to execute the simulation and generate reports:
+### Installation
+Clone the repository:
 
 ```bash
-python main.py
+git clone https://github.com/your-username/nexus-contagion-framework.git
+cd nexus-contagion-framework
 ```
 
-### Outputs
+## Usage
 
-1.  **Console Report:** A summary of Mean Outcomes (PD, LGD, CET1) and Policy Effectiveness.
-2.  **figure1_attractor.pdf:**
-    *   *(a)* The Non-linear Multiplier function showing the critical zone.
-    *   *(b)* A heatmap showing sensitivity of $\kappa$ to Illiquidity ($\lambda$) and FX Sensitivity ($\gamma$).
-3.  **figure2_policy.pdf:**
-    *   *(a)* Bar chart of loss reduction by policy type.
-    *   *(b)* Scatter plot showing trade-offs between Implementation Lag and Side Effects.
+### Running the Triple-Knot Model (TKCM)
+Use this model for static stress testing and policy impact analysis.
 
-## Code Structure
+```python
+from tkcm import TripleKnotContagionModel, TripleKnotVisualizer
 
-*   **`SystemicRegime` (Enum):** Defines the stability thresholds.
-*   **`TripleKnotContagionModel` (Class):**
-    *   `calculate_kappa`: Computes the systemic index.
-    *   `stress_multiplier`: Computes the amplification factor.
-    *   `simulate_nexus_impact`: Runs Monte Carlo simulations comparing standard vs. coupled models.
-    *   `policy_analysis`: Evaluates different regulatory interventions.
-*   **`TripleKnotVisualizer` (Class):** Static methods for generating matplotlib figures.
-*   **`main`:** Execution entry point.
+# Initialize model
+model = TripleKnotContagionModel()
 
-## Example Output
+# Run Scenario Analysis (Baseline vs. Disorderly)
+model.simulate_nexus_impact(scenario_name="Disorderly", base_pd=2.0, base_lgd=45.0, base_cet1=12.0, kappa=0.68)
 
-When running the script, you will see output similar to this:
-
-```text
-============================================================
-TRIPLE-KNOT CONTAGION MODEL RESULTS
-============================================================
-
-Scenario Summary (Mean Outcomes):
-                             Coupled Mean  Standard Mean
-Scenario   Metric                                       
-Baseline   CET1 Ratio (%)       12.85431       13.45120
-           Corporate LGD (%)    42.10050       40.05120
-           Sovereign PD (%)      1.65200        1.51200
-Disorderly CET1 Ratio (%)        8.12040       11.85010
-           Corporate LGD (%)    85.20010       45.12050
-           Sovereign PD (%)      5.12050        2.05010
-
-Policy Effectiveness:
-               Policy  Loss Reduction (%)     Lag    Side
-0     FX Intervention           22.500000   Short  Medium
-1        LOLR Support           14.200000   Short     Low
-2    Capital Controls           65.100000  Medium    High
-3     Macroprudential           31.500000  Medium     Low
+# Generate Policy Analysis
+policy_df = model.policy_analysis()
 ```
+
+### Running the Open Economy Nexus (OENM)
+Use this model for dynamic simulation of crash mechanics and trajectory analysis.
+
+```python
+from nexus_model import OpenEconomyNexus, NexusVisualizer, disorderly_transition_params
+
+# Load Disorderly Transition Parameters
+params = disorderly_transition_params()
+model = OpenEconomyNexus(params)
+
+# Run Monte Carlo Simulation (500 paths)
+mc_paths = model.simulate(n_paths=500)
+
+# Visualize 3D Trajectory and Time Series
+vis = NexusVisualizer()
+vis.plot_time_series(model, *mc_paths[0], show_quantiles=True, mc_paths=mc_paths)
+```
+
+## Comparisons
+
+| Feature | Triple-Knot (TKCM) | Open Economy Nexus (OENM) |
+| :--- | :--- | :--- |
+| **Math Basis** | Algebraic / Static Multipliers | Stochastic Differential Equations |
+| **Time Dimension** | Snapshot (Before/After) | Continuous Time ($t_0 \to T$) |
+| **Key Metric** | $\kappa$ (Systemic Fragility Index) | Jacobian Eigenvalues (Stability) |
+| **Best For** | Capital Planning, Policy Selection | Crisis Mechanics, Tail Risk Dynamics |
+| **Visuals** | Heatmaps, Bar Charts | 3D Phase Plots, Fan Charts |
 
 ## License
-
 This project is open-source and available for educational and research purposes.
